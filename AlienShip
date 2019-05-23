@@ -1,0 +1,177 @@
+package asteroids.participants;
+
+import java.awt.geom.Path2D;
+import java.util.Random;
+import java.awt.Shape;
+import asteroids.destroyers.AsteroidDestroyer;
+import asteroids.destroyers.ShipDestroyer;
+import asteroids.game.Participant;
+import asteroids.game.ParticipantCountdownTimer;
+import asteroids.game.Controller;
+
+public class AlienShip extends Participant implements ShipDestroyer
+{
+    /** The outline of the medium ship */
+    private Shape medOutline;
+    
+    
+    /** Game controller */
+    private Controller controller; 
+    
+    /** The outline of the small ship*/
+    private Shape smallOutline;
+    
+    private int firstTime; 
+    private int nextTime; 
+
+    
+    
+    /** 
+     * Constructs a ship at the specified coordinates that is pointed in the given direction
+     */
+    public AlienShip (int x, int y, double direction, Controller controller)
+    {
+        this.controller = controller; 
+        setPosition(x, y); 
+        setRotation(direction); 
+        
+        //Creating a random way to determine if it will start on the left or right
+        Random r = new Random(); 
+        int rand = r.nextInt(1); 
+        
+        //Creating a random way to determine the initial y value
+        Random a = new Random(); 
+        int randY = r.nextInt(750); 
+        
+        if(rand == 0)
+        {
+        Path2D.Double poly = new Path2D.Double(); 
+        poly.moveTo(-100, randY); 
+        int myY = randY; 
+        poly.lineTo(-100, myY + 4);
+        poly.lineTo(-92, myY + 4);
+        poly.lineTo(-92, myY);
+        poly.lineTo(-64, myY - 20);
+        poly.lineTo(-92, myY - 40);
+        poly.lineTo(-100, myY - 40);
+        poly.lineTo(-120, myY - 20);
+        poly.lineTo(-64,  myY - 20);
+        poly.lineTo(-92, myY);
+        poly.lineTo(-100, myY);
+        //poly.lineTo(-120, myY - 20);
+        poly.closePath();
+        medOutline = poly; 
+        
+        
+        Path2D.Double polyA = new Path2D.Double(); 
+        polyA.moveTo(-100, randY); 
+
+        polyA.lineTo(-100, myY + 2);
+        polyA.lineTo(-96, myY + 2);
+        polyA.lineTo(-96, myY);
+        polyA.lineTo(-82, myY - 10);
+        polyA.lineTo(-96, myY - 20);
+        polyA.lineTo(-100, myY - 20);
+        polyA.lineTo(-110, myY - 10);
+        polyA.lineTo(-82,  myY - 10);
+        polyA.lineTo(-96, myY);
+        polyA.lineTo(-100, myY);
+        //poly.lineTo(-110, myY - 10);
+        polyA.closePath();
+        smallOutline = polyA; 
+        
+        }
+        else 
+        {
+            Path2D.Double poly = new Path2D.Double(); 
+            poly.moveTo(750, randY); 
+            int myY = randY; 
+            
+            poly.lineTo(750, myY + 4);
+            poly.lineTo(758, myY + 4);
+            poly.lineTo(758, myY);
+            poly.lineTo(786, myY - 20);
+            poly.lineTo(758, myY - 40);
+            poly.lineTo(750, myY - 40);
+            poly.lineTo(730, myY - 20);
+            poly.lineTo(786,  myY - 20);
+            poly.lineTo(758, myY);
+            poly.lineTo(750, myY);
+            //poly.lineTo(-120, myY - 20);
+            poly.closePath();
+            medOutline = poly; 
+            
+            
+            Path2D.Double polyA = new Path2D.Double(); 
+            polyA.moveTo(750, randY); 
+            
+            polyA.lineTo(750, myY + 2);
+            polyA.lineTo(754, myY + 2);
+            polyA.lineTo(754, myY);
+            polyA.lineTo(768, myY - 10);
+            polyA.lineTo(754, myY - 20);
+            polyA.lineTo(750, myY - 20);
+            polyA.lineTo(740, myY - 10);
+            polyA.lineTo(768,  myY - 10);
+            polyA.lineTo(754, myY);
+            polyA.lineTo(750, myY);
+            //poly.lineTo(-110, myY - 10);
+            polyA.closePath();
+            smallOutline = polyA; 
+        }
+        
+        
+        new ParticipantCountdownTimer(this, firstTime); 
+        new ParticipantCountdownTimer(this, nextTime); 
+        
+    }
+
+    @Override
+    protected java.awt.Shape getOutline ()
+    {
+        if(controller.getLevel() >= 3)
+        {
+            return smallOutline; 
+        }
+        return medOutline; 
+    }
+
+    @Override
+    public void collidedWith (Participant p)
+    {
+        if(p instanceof AsteroidDestroyer)
+        {
+            Participant.expire(this);
+            
+            new ParticipantCountdownTimer(this, firstTime); 
+            new ParticipantCountdownTimer(this, nextTime); 
+        }
+        
+    } 
+    
+    public int setFirstTime ()
+    {
+        if(controller.level2)
+        {
+            firstTime = 5000; 
+        }
+        return firstTime; 
+    }
+    
+    public int setNextTime()
+    {
+        if(controller.levelUp)
+        {
+            nextTime = 5000; 
+        }
+        return nextTime; 
+    }
+    
+   @Override
+   public void countdownComplete(Object payload)
+   {
+       controller.addParticipant(new AlienShip(750, 100, Math.PI/2, controller)); 
+   }
+   
+
+}
