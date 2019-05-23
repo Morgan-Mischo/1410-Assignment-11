@@ -1,0 +1,76 @@
+package asteroids.participants;
+
+import static asteroids.game.Constants.RANDOM;
+import java.awt.Shape;
+import java.awt.geom.Path2D;
+import asteroids.game.Controller;
+import asteroids.game.Participant;
+import asteroids.game.ParticipantCountdownTimer;
+
+public class Debris extends Participant
+{
+    /** The outline of the debris */
+    private Shape outline; 
+    
+    /** Game controller */
+    private Controller controller; 
+    
+    /** The dust */
+    private Shape dustOutline; 
+    
+    /** 
+     * Constructs debris at the specified coordinates
+     */
+    public Debris (double d, double e, int speed, Controller controller)
+    {
+        this.controller = controller; 
+        setPosition(d, e); 
+        setVelocity(speed, RANDOM.nextDouble() * 2 * Math.PI);
+        
+        Path2D.Double poly = new Path2D.Double();
+        poly.moveTo(1, 1);
+        poly.lineTo(-1, 1);
+        poly.lineTo(-1,-1 );
+        poly.lineTo(1, -1);
+        poly.closePath();
+        dustOutline = poly;
+        
+        
+        this.controller = controller; 
+        setPosition(d, e); 
+        setVelocity(speed, RANDOM.nextDouble() * 2 * Math.PI);
+        
+        Path2D.Double polyA = new Path2D.Double();
+        polyA.moveTo(1, 1);
+        polyA.lineTo(-40, 1);
+        outline = polyA; 
+        
+        new ParticipantCountdownTimer(this, 500); 
+        
+        
+        
+    }
+
+    @Override
+    public Shape getOutline ()
+    {
+        if (controller.shipLost)
+        {
+            return outline; 
+        }
+        return dustOutline; 
+    }
+
+    @Override
+    public void collidedWith (Participant p)
+    {
+       // if (p instanceof ShipDestroyer)
+        
+    }
+    
+    public void countdownComplete (Object payload)
+    {
+        Participant.expire(this); 
+    }
+
+}
