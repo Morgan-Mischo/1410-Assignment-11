@@ -1,0 +1,96 @@
+package asteroids.participants;
+
+import static asteroids.game.Constants.BULLET_LIMIT;
+import java.awt.Shape;
+import java.awt.geom.Path2D;
+//import com.sun.javafx.geom.Ellipse2D;
+import asteroids.destroyers.AsteroidDestroyer;
+import asteroids.destroyers.ShipDestroyer;
+import asteroids.game.Constants;
+//import asteroids.destroyers.ShipDestroyer;
+import asteroids.game.Controller;
+import asteroids.game.Participant;
+import asteroids.game.ParticipantCountdownTimer;
+//import static asteroids.game.Constants.*;
+import asteroids.game.ParticipantState;
+
+public class Bullet extends Participant implements AsteroidDestroyer
+{
+    
+    /** The outline of the bullet */
+    private Shape outline;
+    
+    /** The game controller */
+    private Controller controller; 
+    
+    
+    /** 
+     * Constructs a bullet at the nose of the ship
+     */
+    public Bullet (double x, double y, double direction, Controller controller)
+    {
+        
+        this.controller = controller; 
+        setPosition(x, y); 
+
+        Path2D.Double poly = new Path2D.Double();
+        poly.moveTo(1, 1);
+        poly.lineTo(-1, 1);
+        poly.lineTo(-1,-1 );
+        poly.lineTo(1, -1);
+        poly.closePath();
+        outline = poly;
+        
+       new ParticipantCountdownTimer(this, Constants.BULLET_DURATION);  
+        
+       
+    }
+    
+
+    /** 
+     * Returns bullet outline
+     */
+    @Override
+    protected Shape getOutline ()
+    {
+        return outline; 
+    }
+    
+    /**
+     * Accelerates by BULLET_SPEED
+     */
+    public void setVelocity ()
+    {  
+        double direction = 0; 
+        super.setVelocity(Constants.BULLET_SPEED, direction);
+    }
+    
+    /**
+     * When a bullet collides with a ShipDestroyer, it expires
+     */
+    @Override
+    public void collidedWith (Participant p)
+    {
+        if (p instanceof ShipDestroyer)
+        {
+            // Expire the bullet from the game
+            Participant.expire(this);
+            
+            //Tell the controller the asteroid was destroyed
+            controller.asteroidDestroyed(); 
+        }
+        
+    }
+
+    /**
+     * Method that is invoked when the ParticipantCountdownTimer ends
+     */
+    @Override
+    public void countdownComplete(Object payload)
+    {
+        super.expire(this);
+    }
+
+    
+
+}
