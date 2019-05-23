@@ -1,0 +1,136 @@
+package asteroids.game;
+
+import static asteroids.game.Constants.*;
+import java.awt.*;
+import java.awt.geom.Path2D;
+import java.util.Iterator;
+import javax.swing.*;
+import asteroids.participants.Ship;
+import static asteroids.participants.Ship.*; 
+
+/**
+ * The area of the display in which the game takes place.
+ */
+@SuppressWarnings("serial")
+public class Screen extends JPanel
+{
+    /** Legend that is displayed across the screen */
+    private String legend;
+
+    /** Game controller */
+    private Controller controller;
+    
+    /** String for level */
+    private String level; 
+    
+    /** String for score */
+    private String score; 
+    
+    /** Int for lives */
+    private int lives = 0; 
+    
+    /** The Ship I'll use */
+    private Ship ship; 
+
+    /**
+     * Creates an empty screen
+     */
+    public Screen (Controller controller)
+    {
+        this.controller = controller;
+        legend = "";
+        setPreferredSize(new Dimension(SIZE, SIZE));
+        setMinimumSize(new Dimension(SIZE, SIZE));
+        setBackground(Color.black);
+        setForeground(Color.white);
+        setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 120));
+        setFocusable(true);
+        
+        level = ""; 
+        score = ""; 
+        ship = new Ship(0, 0,-Math.PI / 2, null); 
+    }
+
+    /**
+     * Set the legend
+     */
+    public void setLegend (String legend)
+    {
+        this.legend = legend;
+    }
+
+    /**
+     * Paint the participants onto this panel
+     */
+    @Override
+    public void paintComponent (Graphics graphics)
+    {
+        // Use better resolution
+        Graphics2D g = (Graphics2D) graphics;
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+
+        // Do the default painting
+        super.paintComponent(g);
+//        super.paint(paintLives()); 
+
+        // Draw each participant in its proper place
+        Iterator<Participant> iter = controller.getParticipants();
+        while (iter.hasNext())
+        {
+            iter.next().draw(g);
+        }
+
+        // Draw the legend across the middle of the panel
+        int size = g.getFontMetrics().stringWidth(legend);
+        g.drawString(legend, (SIZE - size) / 2, SIZE / 2);
+        
+        // Draw the level at the top right of the panel
+        int levelSize = g.getFontMetrics().stringWidth(level); 
+        g.drawString(level, (SIZE - levelSize) / 2, SIZE / 2); 
+        
+        // Draw the score at the top left of the panel
+        int x1 = 700; 
+        int y1 = 700; 
+        
+        Font font = new Font("Serif", Font.PLAIN, 12); 
+        g.setFont(font);
+        //FontMetrics fontMetrics = g.getFontMetrics(); 
+        g.drawString(level, x1, y1);
+        
+       
+        
+        //Draw the lives at the top left of the panel
+        int x = 40; 
+        int y = 40; 
+        for(int i = 0; i < controller.getLives(); i++)
+        {
+            x = x + 30; 
+            ship.setPosition(x, y);
+            ship.move(); 
+            ship.draw(g);
+            
+        }
+
+        }
+
+
+    public void setLevel (String level)
+    {
+        this.level = level;
+        
+    }
+    
+    public void setScore (String score)
+    {
+        this.score = score; 
+    }
+    
+    public void setLives (int lives)
+    {
+        this.lives = lives; 
+    }
+    
+    
+    
+}
