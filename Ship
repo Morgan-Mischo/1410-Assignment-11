@@ -1,0 +1,238 @@
+package asteroids.participants;
+
+import static asteroids.game.Constants.*;
+import java.awt.Shape;
+import java.awt.geom.*;
+import asteroids.destroyers.*;
+import asteroids.game.Controller;
+import asteroids.game.Participant;
+import asteroids.game.ParticipantCountdownTimer;
+
+/**
+ * Represents ships
+ */
+public class Ship extends Participant implements AsteroidDestroyer
+{
+    /** The outline of the ship */
+    public Shape outline;
+
+    /** Game controller */
+    private Controller controller;
+
+    /** The outline of the flame */
+    private Shape flameOutline;
+
+    /** The outline of the ship */
+    private static Shape myOutline;
+    
+
+    /**
+     * Constructs a ship at the specified coordinates that is pointed in the given direction.
+     */
+    public Ship (int x, int y, double direction, Controller controller)
+    {
+        this.controller = controller;
+        setPosition(x, y);
+        setRotation(direction);
+
+        Path2D.Double polyA = new Path2D.Double();
+        polyA.moveTo(21, 0);
+        polyA.lineTo(-21, 12);
+        polyA.lineTo(-14, 10);
+        polyA.lineTo(-14, -10);
+        polyA.lineTo(-21, -12);
+        polyA.closePath();
+        polyA.moveTo(-21, 10);
+        polyA.lineTo(-42, 0);
+        polyA.lineTo(-21, -10);
+        flameOutline = polyA;
+
+        Path2D.Double poly = new Path2D.Double();
+        poly.moveTo(21, 0);
+        poly.lineTo(-21, 12);
+        poly.lineTo(-14, 10);
+        poly.lineTo(-14, -10);
+        poly.lineTo(-21, -12);
+        poly.closePath();
+        outline = poly;
+        myOutline = poly;
+
+    }
+
+    /**
+     * Returns the x-coordinate of the point on the screen where the ship's nose is located.
+     */
+    public double getXNose ()
+    {
+        Point2D.Double point = new Point2D.Double(20, 0);
+        transformPoint(point);
+        return point.getX();
+    }
+
+    /**
+     * Returns the 7-coordinate of the point on the screen where the ship's nose is located.
+     */
+    public double getYNose ()
+    {
+        Point2D.Double point = new Point2D.Double(20, 0);
+        transformPoint(point);
+        return point.getY();
+    }
+
+    /**
+     * Returns the point on the screen where the back of the ship 1 is located
+     */
+    public double getXBack1 ()
+    {
+        Point2D.Double point = new Point2D.Double(-21, 12);
+        transformPoint(point);
+        return point.getX();
+
+    }
+
+    /**
+     * Returns the point on the screen where the back of the ship 1 is located
+     */
+    public double getYBack1 ()
+    {
+        Point2D.Double point = new Point2D.Double(-21, 12);
+        transformPoint(point);
+        return point.getY();
+
+    }
+
+    /**
+     * Returns the point on the screen where the back of the ship 2 is located
+     */
+    public double getXBack2 ()
+    {
+        Point2D.Double point = new Point2D.Double(-21, -12);
+        transformPoint(point);
+        return point.getX();
+
+    }
+
+    /**
+     * Returns the point on the screen where the back of the ship 2 is located
+     */
+    public double getYBack2 ()
+    {
+        Point2D.Double point = new Point2D.Double(-21, -12);
+        transformPoint(point);
+        return point.getY();
+    }
+
+    @Override
+    public Shape getOutline ()
+    {
+        if (controller != null)
+        {
+            if (controller.accelerate)
+            {
+                return flameOutline;
+            }
+        }
+        return outline;
+    }
+
+    /**
+     * Customizes the base move method by imposing friction
+     */
+    @Override
+    public void move ()
+    {
+        applyFriction(SHIP_FRICTION);
+        super.move();
+    }
+
+    /**
+     * Turns right by Pi/16 radians
+     */
+    public void turnRight ()
+    {
+        rotate(Math.PI / 16);
+    }
+
+    /**
+     * Turns left by Pi/16 radians
+     */
+    public void turnLeft ()
+    {
+        rotate(-Math.PI / 16);
+    }
+
+    /**
+     * Accelerates by SHIP_ACCELERATION
+     */
+    public void accelerate ()
+    {
+        accelerate(SHIP_ACCELERATION);
+    }
+
+    /**
+     * When a ship collides with a ShipDestroyer, it expires
+     */
+    @Override
+    public void collidedWith (Participant p)
+    {
+        if (p instanceof ShipDestroyer)
+        {
+            // Expire the ship from the game
+            Participant.expire(this);
+
+            // Tell the controller the ship was destroyed
+            controller.shipDestroyed();
+
+            // Show debris
+            controller.addParticipant(new Debris(this.getX(), this.getY(), 2, controller));
+            controller.addParticipant(new Debris(this.getX(), this.getY(), 2, controller));
+            controller.addParticipant(new Debris(this.getX(), this.getY(), 2, controller));
+            controller.addParticipant(new Debris(this.getX(), this.getY(), 2, controller));
+        }
+    }
+
+    /**
+     * Method that is invoked when a ParticipantCountdownTimer completes its countdown
+     */
+    @Override
+    public void countdownComplete (Object payload)
+    {
+        // if (payload.equals("accelerate"))
+        // {
+        // move();
+        // new ParticipantCountdownTimer(this, "accelerate", 40);
+        // makeFlame();
+        //
+        // }
+        // else if (payload.equals("turnLeft"))
+        // {
+        // turnLeft();
+        // new ParticipantCountdownTimer(this, "turnLeft", 40);
+        // }
+        // else if (payload.equals("turnRight"))
+        // {
+        // turnRight();
+        // new ParticipantCountdownTimer(this, "turnRight", 40);
+        // }
+    }
+
+    /**
+     * Makes the flame that shoots out of the back of the ship
+     */
+    // public void makeFlame ()
+    // {
+    // Path2D.Double poly = new Path2D.Double();
+    // poly.moveTo(getXBack1(), getYBack1());
+    // poly.lineTo(getXBack2(), getYBack2());
+    // poly.lineTo(getXBack1() + 22, getYBack1() - 11);
+    // poly.closePath();
+    // poly = flameOutline;
+
+    // }
+
+    public static Shape myOutline ()
+    {
+        return myOutline;
+    }
+
+}
